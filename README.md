@@ -530,4 +530,125 @@ export const { useGetUsersQuery } = api;
 - Using index as key for dynamic lists in connected components
 
 
+# React Query (TanStack Query) Interview Questions and Answers
+
+## 1. What is React Query?
+**Answer:**
+React Query is a **data-fetching library** for React that simplifies fetching, caching, synchronizing, and updating server state.
+- It is not a global state management library.
+- Handles caching, background updates, pagination, retries, and more.
+
+## 2. Why use React Query over Redux for server state?
+**Answer:**
+- Automatic caching and background updates
+- Built-in retries for failed requests
+- Focused on server state, not UI state
+- Reduces boilerplate compared to Redux + Thunks
+
+## 3. Basic usage example
+```javascript
+import { useQuery } from '@tanstack/react-query';
+
+function Users() {
+  const { data, isLoading, error } = useQuery(['users'], fetchUsers);
+
+  if (isLoading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error.message}</div>;
+
+  return <ul>{data.map(user => <li key={user.id}>{user.name}</li>)}</ul>;
+}
+```
+
+## 4. `queryKey` and `queryFn`
+- `queryKey`: unique identifier for caching the query
+- `queryFn`: async function that fetches data
+
+## 5. Caching
+- React Query caches data for a default period (5 minutes)
+- Use `staleTime` and `cacheTime` to control freshness and cache duration
+```javascript
+useQuery(['users'], fetchUsers, { staleTime: 60000, cacheTime: 300000 });
+```
+
+## 6. Background refetching
+- Queries refetch automatically on window focus or reconnect
+- Can disable with `refetchOnWindowFocus: false`
+
+## 7. Mutations
+- Used for POST, PUT, DELETE operations
+- `useMutation` hook manages async mutations
+```javascript
+const mutation = useMutation(addUser, {
+  onSuccess: () => queryClient.invalidateQueries(['users'])
+});
+```
+
+## 8. Query invalidation
+- Refresh cached data after mutation
+- Use `queryClient.invalidateQueries(['key'])`
+
+## 9. Pagination & Infinite Queries
+- `useInfiniteQuery` for fetching pages of data
+- Example:
+```javascript
+const { data, fetchNextPage, hasNextPage } = useInfiniteQuery(
+  ['posts'], fetchPosts, {
+    getNextPageParam: (lastPage) => lastPage.nextCursor,
+  }
+);
+```
+
+## 10. Query cancellation
+- React Query cancels queries automatically on component unmount
+- Supports abort signals in fetch
+
+## 11. DevTools
+- `ReactQueryDevtools` for inspecting queries, mutations, and cache
+```javascript
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+<ReactQueryDevtools initialIsOpen={false} />
+```
+
+## 12. Optimistic updates
+- Update UI before server responds
+- Rollback on error
+```javascript
+useMutation(addTodo, {
+  onMutate: async (newTodo) => {
+    await queryClient.cancelQueries(['todos']);
+    const previousTodos = queryClient.getQueryData(['todos']);
+    queryClient.setQueryData(['todos'], old => [...old, newTodo]);
+    return { previousTodos };
+  },
+  onError: (err, newTodo, context) => {
+    queryClient.setQueryData(['todos'], context.previousTodos);
+  },
+  onSettled: () => queryClient.invalidateQueries(['todos'])
+});
+```
+
+## 13. `staleTime` vs `cacheTime`
+- `staleTime`: time before data is considered stale (triggers background refetch)
+- `cacheTime`: how long unused data stays in cache before garbage collection
+
+## 14. React Query with TypeScript
+```typescript
+interface User { id: number; name: string; }
+const { data } = useQuery<User[]>(['users'], fetchUsers);
+```
+
+## 15. Advantages
+- Automatic caching & refetching
+- Simplifies async state management
+- Background updates
+- Pagination and infinite loading built-in
+- Works well with SSR (Next.js)
+
+## 16. Common mistakes
+- Using same queryKey for unrelated queries
+- Not handling error/loading states
+- Overfetching without staleTime
+- Forgetting to invalidate queries after mutation
+
+
 
