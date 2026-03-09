@@ -361,3 +361,173 @@ The **diffing algorithm** is crucial for React's performance. By leveraging virt
 
 
 
+
+# Redux Toolkit Interview Questions and Answers
+
+## 1. What is Redux Toolkit?
+**Answer:**
+Redux Toolkit (RTK) is the **official, recommended approach for writing Redux logic**. It simplifies Redux by providing:
+- `configureStore` for easy store setup
+- `createSlice` for reducers and actions in one place
+- `createAsyncThunk` for async logic
+- Built-in DevTools and middleware integration
+
+## 2. Why use Redux Toolkit over traditional Redux?
+**Answer:**
+- Reduces boilerplate
+- Simplifies store setup
+- Provides opinionated best practices
+- Built-in support for immutability with Immer
+- Better developer experience (DevTools, TypeScript support)
+
+## 3. Explain `configureStore`
+**Answer:**
+- Function to create the Redux store
+- Accepts `reducer`, `middleware`, `devTools`, and `preloadedState`
+- Automatically adds **Thunk middleware**
+
+```javascript
+import { configureStore } from '@reduxjs/toolkit';
+import counterReducer from './counterSlice';
+
+const store = configureStore({
+  reducer: { counter: counterReducer },
+});
+```
+
+## 4. What is `createSlice`?
+**Answer:**
+- Combines action creators and reducers
+- Automatically generates action types
+
+```javascript
+import { createSlice } from '@reduxjs/toolkit';
+
+const counterSlice = createSlice({
+  name: 'counter',
+  initialState: { value: 0 },
+  reducers: {
+    increment: state => { state.value += 1 },
+    decrement: state => { state.value -= 1 },
+  },
+});
+
+export const { increment, decrement } = counterSlice.actions;
+export default counterSlice.reducer;
+```
+
+## 5. What is `createAsyncThunk`?
+**Answer:**
+- Handles asynchronous logic (API calls)
+- Automatically dispatches `pending`, `fulfilled`, `rejected` actions
+
+```javascript
+import { createAsyncThunk } from '@reduxjs/toolkit';
+
+export const fetchUser = createAsyncThunk(
+  'users/fetchUser',
+  async (userId) => {
+    const response = await fetch(`/api/users/${userId}`);
+    return response.json();
+  }
+);
+```
+
+## 6. How to handle loading, success, error states with `createAsyncThunk`?
+```javascript
+const userSlice = createSlice({
+  name: 'user',
+  initialState: { data: null, loading: false, error: null },
+  extraReducers: (builder) => {
+    builder
+      .addCase(fetchUser.pending, (state) => { state.loading = true })
+      .addCase(fetchUser.fulfilled, (state, action) => {
+        state.loading = false;
+        state.data = action.payload;
+      })
+      .addCase(fetchUser.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message;
+      });
+  },
+});
+```
+
+## 7. Explain Immer integration in Redux Toolkit
+**Answer:**
+- RTK uses **Immer** to allow mutable updates in reducers
+- Internally produces immutable updates
+- Example: `state.value += 1` is safe
+
+## 8. How to structure Redux Toolkit project?
+**Answer:**
+- Slice-based folder structure:
+```
+src/
+  store/
+    index.js
+    counterSlice.js
+    userSlice.js
+  components/
+  pages/
+```
+
+## 9. How to use Redux Toolkit with TypeScript?
+**Answer:**
+- Define `RootState` and `AppDispatch` types
+- Use `TypedUseSelectorHook` and `useDispatch` hooks
+```typescript
+import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux';
+import type { RootState, AppDispatch } from './store';
+
+export const useAppDispatch = () => useDispatch<AppDispatch>();
+export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
+```
+
+## 10. Middleware in Redux Toolkit
+**Answer:**
+- `configureStore` allows adding custom middleware
+- Default includes Thunk
+```javascript
+const store = configureStore({
+  reducer: rootReducer,
+  middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(logger),
+});
+```
+
+## 11. What is RTK Query?
+**Answer:**
+- Advanced data fetching tool included in Redux Toolkit
+- Simplifies API calls, caching, invalidation
+- Reduces boilerplate compared to createAsyncThunk
+
+## 12. Example of RTK Query usage
+```javascript
+import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+
+export const api = createApi({
+  reducerPath: 'api',
+  baseQuery: fetchBaseQuery({ baseUrl: '/api' }),
+  endpoints: (builder) => ({
+    getUsers: builder.query({ query: () => 'users' }),
+  }),
+});
+
+export const { useGetUsersQuery } = api;
+```
+
+## 13. Advantages of Redux Toolkit
+- Less boilerplate
+- Immer for immutable state updates
+- Async handling with createAsyncThunk
+- Built-in DevTools support
+- RTK Query for data fetching
+
+## 14. Common mistakes
+- Forgetting to use unique slice names
+- Mutating state outside of reducers
+- Not handling loading/error states properly
+- Using index as key for dynamic lists in connected components
+
+
+
