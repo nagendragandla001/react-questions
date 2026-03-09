@@ -302,3 +302,62 @@ startTransition(() => setState(newValue));
 - Keyboard navigation
 - Semantic HTML, focus management
 
+
+
+# React Diffing Algorithm
+
+## Introduction
+The **diffing algorithm** in React is a core part of the **reconciliation process**. It determines how the **virtual DOM** is compared with the previous version to efficiently update the real DOM.
+
+## Key Concepts
+
+1. **Virtual DOM**
+   - React maintains a lightweight copy of the real DOM called the virtual DOM.
+   - When state or props change, a new virtual DOM tree is created.
+
+2. **Diffing**
+   - React compares the new virtual DOM with the previous one.
+   - Only the differences (diffs) are applied to the real DOM, reducing expensive DOM operations.
+
+3. **Heuristics**
+   React uses certain heuristics to make diffing **O(n)** instead of **O(n^3)**:
+   - **Elements of different types** → Replace entire subtree.
+   - **Elements of the same type** → Compare attributes and children.
+   - **Lists with keys** → Keys help track which items changed, added, or removed.
+
+## Steps in Diffing Algorithm
+
+1. **Element Type Check**
+   - If the element type changes (e.g., `<div>` → `<span>`), React replaces the old subtree entirely.
+
+2. **Attributes Comparison**
+   - For elements with the same type, React compares the attributes and updates only the changed ones.
+
+3. **Child Reconciliation**
+   - **Without keys:** Children are compared in order. Reordering may lead to unnecessary DOM operations.
+   - **With keys:** Helps React identify and match elements correctly to minimize changes.
+
+## Best Practices
+
+- **Always provide unique keys** for list items.
+- Avoid using **index as key** when list order can change.
+- Keep component trees **shallow** to optimize diffing.
+- Split large components into smaller ones to localize updates.
+
+## Example
+```jsx
+const List = ({ items }) => (
+  <ul>
+    {items.map(item => (
+      <li key={item.id}>{item.name}</li>
+    ))}
+  </ul>
+);
+```
+- Using `item.id` as a key ensures React efficiently updates only the changed items.
+
+## Conclusion
+The **diffing algorithm** is crucial for React's performance. By leveraging virtual DOM, keys, and optimized comparison heuristics, React minimizes direct DOM manipulations and ensures smooth UI updates.
+
+
+
