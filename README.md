@@ -1,4 +1,4 @@
-# React Interview Questions and Answers (Q1–Q60)
+# React Interview Questions and Answers
 
 ## React Developer Basics (Q1–Q20)
 
